@@ -6,9 +6,9 @@ clc
 
 %% Generate data bit stream
 number_of_bits = 1000000;                % number of transmitted bits
-amplitude = 1;                           % amp;itude of transmitted signal
+amplitude = 1;                           % amplitude of transmitted signal
 bits = randi([0 1], 1, number_of_bits);  % generate random bits
-Tx_Data = amplitude*(2*bits-1);          % converete to polar code
+Tx_Data = amplitude*(2*bits-1);          % convert to polar code
 
 %% Add AWGN from Channel
 Eb = 1;                                              % energy of bit
@@ -42,9 +42,9 @@ hold off
 %% Generate data bit stream
 number_of_bits = 1000000;                % number of transmitted bits
 M = 4;                                   % number of symbols
-amplitude = 1;                           % amp;itude of transmitted signal
+amplitude = 1;                           % amplitude of transmitted signal
 bits = randi([0 1], 1, number_of_bits);  % generate random bits
-Data = amplitude*(2*bits-1);              % converete to polar code
+Data = amplitude*(2*bits-1);              % convert to polar code
 real_part = Data(1, 1:2:end);            % get real part
 imaginary = Data(1, 2:2:end);            % get imaginary part
 Tx_Data = (real_part+1j*imaginary);       % determine Tx data
@@ -147,7 +147,7 @@ hold off
 %% Generate data bit stream
 number_of_bits = 1000000;                    % number of transmitted bits
 M = 16;                                      % number of symbols
-amplitude = 1;                               % amp;itude of transmitted signal
+amplitude = 1;                               % amplitude of transmitted signal
 data_bits = randi([0 1], 1, number_of_bits); % generate random bits
 Tx_Data = mapping_16QAM(data_bits);          % determine Tx data
 %% Add AWGN from Channel
@@ -180,7 +180,7 @@ hold off
 %% FSK
 %% Generate data bit stream
 number_of_bits = 1000000;                      % number of transmitted bits
-amplitude = 1;                               % amp;itude of transmitted signal
+amplitude = 1;                               % amplitude of transmitted signal
 data_bits = randi([0 1], 1, number_of_bits); % generate random bits
 Tx_Data = data_bits;                          % determine Tx data
 Tx_Data(Tx_Data==1)=1j;
