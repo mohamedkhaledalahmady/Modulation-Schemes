@@ -30,6 +30,7 @@ figure
 semilogy(SNR, BER_Calculated_BPSK, 'LineWidth', 2)
 xlim([-2 12])
 hold on
+figure
 semilogy(SNR, BER_Theoretical, 'LineWidth', 2)
 xlabel("Eb/No")
 ylabel("Bit Error Rate (BER)")
@@ -176,12 +177,45 @@ title("BER vs. SNR Curve for 16QAM")
 legend("Calculated BER", "Theoretical BER")
 grid on
 hold off
+%% FSK
+%% Generate data bit stream
+number_of_bits = 1000000;                      % number of transmitted bits
+amplitude = 1;                               % amp;itude of transmitted signal
+data_bits = randi([0 1], 1, number_of_bits); % generate random bits
+Tx_Data = data_bits;                          % determine Tx data
+Tx_Data(Tx_Data==1)=1j;
+Tx_Data(Tx_Data==0)=1;
+%% Add AWGN from Channel
+Eb = 1;
+SNR = -2:0.5:20;                                     % SNR values 
+No = Eb./(10.^(SNR/10));                             % variance value of noise
+noise = (sqrt(No/2))'.*randn(1, number_of_bits) + 1j*(sqrt(No/2))'.*randn(1, number_of_bits);    % generate noise with zero mean and No/2 variance
+%% Add Noise to Tx data
+Rx_Data = Tx_Data + noise;                           % adding noise to Tx data
+%% BER Calculations
+BER_Theoretical_FSK = 0.5*erfc(sqrt(E./(2*No)));
+BER_Calculated_FSK = zeros(1, length(SNR));
+for i = 1 : length(SNR)
+    BER_Calculated_FSK(1, i) = BER_FSK(data_bits, Rx_Data(i, :))/(number_of_bits);
+end
+figure
+semilogy(SNR, BER_Calculated_FSK, 'LineWidth', 2)
+hold on
+semilogy(SNR, BER_Theoretical_FSK, 'LineWidth', 2)
+xlim([-2 12])
+xlabel("Eb/No")
+ylabel("Error Rate")
+title("BER vs. SNR Curve for 16QAM")
+legend("Calculated BER", "Theoretical BER")
+grid on
+hold off
 %% Comparison
 BER_Calculated_BPSK
 BER_Calculated_QPSK_1
 BER_Calculated_QPSK_2
 BER_Calculated_BPSK
-BER_Theoretical_16QAM
+BER_Calculated_16QAM
+BER_Calculated_FSK
 figure
 semilogy(SNR, BER_Calculated_BPSK, 'LineWidth', 2)
 hold on
@@ -192,11 +226,13 @@ hold on
 semilogy(SNR, BER_Calculated_8PSK, 'LineWidth', 2)
 hold on
 semilogy(SNR, BER_Calculated_16QAM, 'LineWidth', 2)
+hold on
+semilogy(SNR, BER_Calculated_FSK, 'LineWidth', 2)
 xlabel("Eb/No")
 ylabel("Bit Error Rate")
 title("BER vs. SNR Curve")
 ylim([10^-5 10^0])
-legend("Calculated BPSK", "Calculated QPSK_1", "Calculated QPSK_2", "Calculated 8PSK", "Calculated 16QAM")
+legend("Calculated BPSK", "Calculated QPSK_1", "Calculated QPSK_2", "Calculated 8PSK", "Calculated 16QAM", "Calculated FSK")
 grid on
 hold off
 %% Useful Functions    
@@ -447,5 +483,13 @@ function incorrect_bits = BER_16QAM(Tx_bits, Rx)
         end        
         k=k+1;
     end
+    incorrect_bits = sum(Rx_bits ~= Tx_bits);
+end
+%% BER FSK
+function incorrect_bits = BER_FSK(Tx_bits, Rx)
+    x1 = real(Rx);
+    x2 = imag(Rx);    
+    y = x1 - x2;
+    Rx_bits = 0.5*(1-sign(y));
     incorrect_bits = sum(Rx_bits ~= Tx_bits);
 end
