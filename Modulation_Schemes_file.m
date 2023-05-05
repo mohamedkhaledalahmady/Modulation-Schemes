@@ -12,20 +12,20 @@ Tx_Data = 2*bits-1;                         % mapping to BPSK
 %% Add AWGN from Channel
 Eb = 1;                                                 % energy of bit
 SNR = -2:0.5:20;                                        % SNR valus
-No = Eb ./ (10 .^ (SNR / 10));                          % variance value of noise
-noise = (sqrt(No / 2))' .* randn(1, number_of_bits);    % generate noise with zero mean and No/2 variance
+No = Eb./(10.^(SNR/10));                                % variance value of noise
+noise = (sqrt(No/2))'.*randn(1, number_of_bits);        % generate noise with zero mean and No/2 variance
 %% Add Noise to Tx data
 Rx_Data = Tx_Data + noise;                              % adding noise to Tx data
 %% BER Calculations
 BER_Calculated_BPSK = zeros(1, length(SNR));
-BER_Theoretical = 0.5*erfc(sqrt(Eb./No));
+BER_Theoretical_BPSK = 0.5*erfc(sqrt(Eb./No));
 for i = 1:length(SNR)
     BER_Calculated_BPSK(1, i) = (sum(sign(Rx_Data(i, :)) ~= Tx_Data))/number_of_bits;
 end
 figure
 semilogy(SNR, BER_Calculated_BPSK, 'LineWidth', 2)
 hold on
-semilogy(SNR, BER_Theoretical, 'LineWidth', 2)
+semilogy(SNR, BER_Theoretical_BPSK, 'LineWidth', 2)
 xlim([-2 12])
 xlabel("Eb/No (dB)")
 ylabel("Bit Error Rate (BER)")
@@ -44,7 +44,7 @@ Tx_Data = mapping_QPSK_1(bits);                 % determine Tx data
 Eb = 1;                                         % energy of bit
 SNR = -2:0.5:20;                                % SNR values
 No = Eb./(10.^(SNR/10));                        % variance value of noise
-noise = (sqrt(No / 2))' .* randn(1, number_of_bits / 2) + 1j * (sqrt(No / 2))' .* randn(1, number_of_bits / 2); % generate noise with zero mean and No/2 variance
+noise = (sqrt(No/2))'.*randn(1, number_of_bits/2) + 1j*(sqrt(No/2))'.*randn(1, number_of_bits/2); % generate noise with zero mean and No/2 variance
 %% Add Noise to Tx data
 Rx_Data = Tx_Data + noise;                      % adding noise to Tx data
 %% BER Calculations
@@ -181,7 +181,7 @@ noise = (sqrt(No / 2))' .* randn(1, number_of_bits) + 1j * (sqrt(No / 2))' .* ra
 %% Add Noise to Tx data
 Rx_Data = Tx_Data + noise;                      % adding noise to Tx data
 %% BER Calculations
-BER_Theoretical_FSK = 0.5 * erfc(sqrt(E ./ (2 * No)));
+BER_Theoretical_FSK = 0.5*erfc(sqrt(E./(2*No)));
 BER_Calculated_FSK = zeros(1, length(SNR));
 for i = 1:length(SNR)
     BER_Calculated_FSK(1, i) = BER_FSK(data_bits, Rx_Data(i, :))/(number_of_bits);
@@ -197,26 +197,89 @@ title("BER vs. SNR Curve for 16QAM")
 legend("Calculated BER", "Theoretical BER")
 grid on
 hold off
+
 %% Comparison
 figure
 semilogy(SNR, BER_Calculated_BPSK, 'LineWidth', 2)
 hold on
+semilogy(SNR, BER_Theoretical_BPSK, '*', 'LineWidth', 1)
+hold on
 semilogy(SNR, BER_Calculated_QPSK_1, 'LineWidth', 2)
+hold on
+semilogy(SNR, BER_Theoretical_QPSK, '+', 'LineWidth', 1)
 hold on
 semilogy(SNR, BER_Calculated_QPSK_2, 'LineWidth', 2)
 hold on
 semilogy(SNR, BER_Calculated_8PSK, 'LineWidth', 2)
 hold on
+semilogy(SNR, BER_Theoretical_8PSK, 'o', 'LineWidth', 1)
+hold on
 semilogy(SNR, BER_Calculated_16QAM, 'LineWidth', 2)
 hold on
+semilogy(SNR, BER_Theoretical_16QAM, '*', 'LineWidth', 1)
+hold on
 semilogy(SNR, BER_Calculated_FSK, 'LineWidth', 2)
+hold on
+semilogy(SNR, BER_Theoretical_FSK, '+', 'LineWidth', 1)
 xlabel("Eb/No (dB)")
 ylabel("Bit Error Rate")
 title("BER vs. SNR Curve")
-ylim([10 ^ -5 10 ^ 0])
-legend("Calculated BPSK", "Calculated QPSK_1", "Calculated QPSK_2", "Calculated 8PSK", "Calculated 16QAM", "Calculated FSK")
+ylim([10^-5 10^0])
+legend("Calculated BPSK", "Theoretical BPSK", "Calculated QPSK_1", "Theoretical QPSK", ...
+    "Calculated QPSK_2", "Calculated 8PSK", "Theoretical 8PSK", "Calculated 16QAM", "Theoretical 16QAM", "Calculated FSK", "Theoretical FSK")
 grid on
 hold off
+
+%% PSD for FSK
+%% Generate Ensample
+clear
+clc
+close all
+number_of_enamples=500;                                                 % total number of Realizations
+number_of_bits=100;                                                     % number of bits in each Realization
+number_of_samples_per_bit=7;                                            % number of samples for each bit
+number_of_samples=number_of_bits*number_of_samples_per_bit;             % total number of samples for each Realization
+Total_Transmitted_Data=zeros(number_of_enamples, number_of_samples-1);  % hold transmitted data
+for i = 1 : number_of_enamples
+    if i == 1
+        Total_Transmitted_Data = Generate_Random_Data();
+    else
+        Total_Transmitted_Data = [Total_Transmitted_Data; Generate_Random_Data()];
+    end
+end
+%% Calculate Statistical AutoCorrelation function (ACF)
+average=zeros(1, number_of_samples);            % 1x700 
+for i = 1 : number_of_samples
+    average(1,i) = mean((Total_Transmitted_Data(:,1)).*conj((Total_Transmitted_Data(:,i))));
+end
+average=[fliplr(average(1, 2:end)) average];
+figure
+plot(((-number_of_samples+1):1:(number_of_samples-1)), average)
+grid on
+xlabel("\tau")
+ylabel("ACF")
+title("Statistical ACF")
+xlim([-20 20])
+% ylim([-A^2+5 A^2+5])
+
+%% Calculate PSD
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+PSD = fftshift(fft(average));
+N = length(PSD);                                % Number of samples
+Tb=7;
+Ts=1/Tb;                                        % sample duration
+Fs=1/Ts;                                        % sampling frequency
+freq = (-N/2+1:N/2)*(Fs/(N));                   % Frequency axis (Hz)
+figure
+plot(freq, abs(PSD));                 
+xlabel('Frequency (Hz)');
+ylabel('Magnitude');
+title('PSD of BaseBand Signal');
+grid on
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% shift PSD
+
 
 %% Useful Functions
 %% Mapping QPSK_1
@@ -236,7 +299,7 @@ function y = mapping_QPSK_2(x)
     M = 4;
     bits = log2(M);
     Eb = 1;
-    E = bits * Eb;
+    E = bits*Eb;
     split_x = reshape(x, bits, length(x) / bits)';
     split_x_indices = bi2de(split_x, 'left-msb')+1;
     y = zeros(length(split_x_indices), 1);
@@ -379,4 +442,59 @@ function incorrect_bits = BER_FSK(Tx_bits, Rx)
     y = x1 - x2;
     Rx_bits = 0.5 * (1 - sign(y));
     incorrect_bits = sum(Rx_bits ~= Tx_bits);
+end
+%% Generate Random Data
+function data_transmitted = Generate_Random_Data()
+Tb = 7;
+Eb = 1;
+delta_f = 1/Tb;
+t = 0:1:Tb-1;
+% t = 0:1/Tb:1-1/Tb;
+S1_BB(1:Tb, 1) = sqrt(2*Eb/Tb)*(cos(2*pi*delta_f*t)+1j*sin(2*pi*delta_f*t));
+S2_BB(1:Tb, 1) = sqrt(2*Eb/Tb);
+% S1_BB(1:Tb, 1) = sqrt(2*Eb/Tb)*(cos(pi*delta_f*t)-1j*sin(pi*delta_f*t));
+% S2_BB(1:Tb, 1) = sqrt(2*Eb/Tb)*(cos(pi*delta_f*t)+1j*sin(pi*delta_f*t));
+number_of_bits=100;                         % number of bits in each realization
+data=randi([0 1],[1,number_of_bits+1]);     % generate 1x100 random numbers '0' or '1'
+y(Tb, length(data))= 0;
+y(:, find(data==0))= repmat(S1_BB, 1, length(find(data==0)));
+y(:, find(data==1))= repmat(S2_BB, 1, length(find(data==1)));
+data=reshape(y, 1, size(y, 1)*size(y, 2));
+data=data(:);                               % convert data to column vector 700x1
+% Generate random time shift
+td=randi([0 Tb-1]);                         % generate random number from 0 to 6
+% Concatenate with Random Data
+data_transmitted = (data(td+1:7*number_of_bits+td))';    % window data from td to 700+td (700 samples)
+end
+
+function Data_transmitted = fun()
+number_of_realizations = 500;
+number_of_bits = 101;
+number_of_samples = 7;
+n = 700;
+Eb= 1;
+Tb= 7;
+bits = randi ([0 1] ,number_of_realizations ,number_of_bits);
+
+% Data = zeros (number_of_realizations , size(bits,2)*number_of_samples);
+Data = [];
+s_one = zeros(1, number_of_samples);
+s_one (1,:) = sqrt(2*Eb/Tb);
+s_zero = (sqrt(2*Eb/Tb))*cos(2*pi*(0:Tb/number_of_samples:(Tb-Tb/number_of_samples))/Tb^2)+1j*(sqrt(2*Eb/Tb))*sin(2*pi*(0:Tb/number_of_samples:(Tb-Tb/number_of_samples))/Tb^2);
+ for row = 1: number_of_realizations
+     for column = 1 :number_of_bits
+         if bits(row , column ) == 1
+             Data = [Data , s_one];
+         else
+            Data = [Data, s_zero];
+         end
+     end   
+ end
+ Data = (reshape (Data, number_of_bits*Tb , number_of_realizations))';
+ Data_transmitted = zeros (number_of_realizations, n);
+ for i = 1: number_of_realizations
+     td=randi(number_of_samples)-1;              % generate random number from 0 to 6
+     X = Data(i,:);
+     Data_transmitted(i,:) = X(td+1: n+td);
+ end
 end
