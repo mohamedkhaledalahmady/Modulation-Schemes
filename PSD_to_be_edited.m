@@ -30,11 +30,19 @@ s_zero = (sqrt(2*Eb/Tb))*cos(2*pi*(0:Tb/number_of_samples:(Tb-Tb/number_of_sampl
      Data_transmitted(i,:) = X(td+1: n+td);
  end
  
- average=zeros(1,700);  
-for i = 1 : number_of_samples
-    average(1,i) = mean(Data_transmitted(:,1) .* Data_transmitted(:,i));
+average=zeros(1,700);  
+for i = 1 : n
+    average(1,i) = mean(conj(Data_transmitted(:,1)) .* Data_transmitted(:,i));
 end
 average=[fliplr(average(1, 2:end)) average];
+
+% figure
+% plot(((-700+1):1:(700-1)), average)
+% grid on
+% xlabel("\tau")
+% ylabel("ACF")
+% title("Statistical ACF")
+
 PSD = fftshift(fft(average));
 N = length(PSD);                                                                      
 Fs=7;                                        
