@@ -36,14 +36,6 @@ for i = 1 : n
     average(1,i) = mean(conj(Data_transmitted(:,1)) .* Data_transmitted(:,i));
 end
 average=[fliplr(average(1, 2:end)) average];
-
-% figure
-% plot(((-700+1):1:(700-1)), average)
-% grid on
-% xlabel("\tau")
-% ylabel("ACF")
-% title("Statistical ACF")
-
 PSD = fftshift(fft(average));
 N = length(PSD);                                                                      
 Fs=7;                                        
