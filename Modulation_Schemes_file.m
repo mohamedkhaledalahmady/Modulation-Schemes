@@ -235,10 +235,10 @@ hold off
 clear
 clc
 close all
-number_of_enamples=500;                                                 % total number of Realizations
-number_of_bits=100;                                                     % number of bits in each Realization
-number_of_samples_per_bit=7;                                            % number of samples for each bit
-number_of_samples=number_of_bits*number_of_samples_per_bit;             % total number of samples for each Realization
+number_of_enamples=500;                          % total number of Realizations
+number_of_bits=100;                              % number of bits in each Realization
+Tb=7;                                            % number of samples for each bit
+number_of_samples=number_of_bits*Tb;             % total number of samples for each Realization
 Total_Transmitted_Data=zeros(number_of_enamples, number_of_samples-1);  % hold transmitted data
 for i = 1 : number_of_enamples
     if i == 1
@@ -247,39 +247,40 @@ for i = 1 : number_of_enamples
         Total_Transmitted_Data = [Total_Transmitted_Data; Generate_Random_Data()];
     end
 end
-%% Calculate Statistical AutoCorrelation function (ACF)
-average=zeros(1, number_of_samples);            % 1x700 
+%%Calculate Statistical AutoCorrelation function (ACF)
+average=zeros(1, number_of_samples);
 for i = 1 : number_of_samples
     average(1,i) = mean((Total_Transmitted_Data(:,1)).*conj((Total_Transmitted_Data(:,i))));
 end
-average=[fliplr(average(1, 2:end)) average];
 figure
-plot(((-number_of_samples+1):1:(number_of_samples-1)), average)
+plot(average)
 grid on
 xlabel("\tau")
 ylabel("ACF")
 title("Statistical ACF")
-xlim([-20 20])
-% ylim([-A^2+5 A^2+5])
-
-%% Calculate PSD
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%Calculate PSD
 PSD = fftshift(fft(average));
 N = length(PSD);                                % Number of samples
-Tb=7;
-Ts=1/Tb;                                        % sample duration
+Ts=1;                                           % sample duration every 1 sec
 Fs=1/Ts;                                        % sampling frequency
-freq = (-N/2+1:N/2)*(Fs/(N));                   % Frequency axis (Hz)
+freq =(-N/2+1:N/2)*(Fs/(N));                    % Frequency axis (Hz)
 figure
-plot(freq, abs(PSD));                 
+plot(freq, abs(PSD)/N, 'linewidth', 2);                 
 xlabel('Frequency (Hz)');
 ylabel('Magnitude');
 title('PSD of BaseBand Signal');
 grid on
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% shift PSD
-
+%%shift PSD
+fc=1e1;
+freq1 = ((-N/2+1:N/2)*(Fs/(N))+fc);             % Frequency axis (Hz)
+freq2 = ((-N/2+1:N/2)*(Fs/(N))-fc);             % Frequency axis (Hz)
+figure
+plot(freq1, abs(PSD)/N, freq2, abs(PSD)/N, 'linewidth', 2);                 
+xlabel('Frequency (Hz)');
+ylabel('Magnitude');
+title('PSD of PassBand Signal');
+grid on
 
 %% Useful Functions
 %% Mapping QPSK_1
@@ -449,7 +450,6 @@ Tb = 7;
 Eb = 1;
 delta_f = 1/Tb;
 t = 0:1:Tb-1;
-% t = 0:1/Tb:1-1/Tb;
 S1_BB(1:Tb, 1) = sqrt(2*Eb/Tb)*(cos(2*pi*delta_f*t)+1j*sin(2*pi*delta_f*t));
 S2_BB(1:Tb, 1) = sqrt(2*Eb/Tb);
 % S1_BB(1:Tb, 1) = sqrt(2*Eb/Tb)*(cos(pi*delta_f*t)-1j*sin(pi*delta_f*t));
@@ -464,37 +464,5 @@ data=data(:);                               % convert data to column vector 700x
 % Generate random time shift
 td=randi([0 Tb-1]);                         % generate random number from 0 to 6
 % Concatenate with Random Data
-data_transmitted = (data(td+1:7*number_of_bits+td))';    % window data from td to 700+td (700 samples)
-end
-
-function Data_transmitted = fun()
-number_of_realizations = 500;
-number_of_bits = 101;
-number_of_samples = 7;
-n = 700;
-Eb= 1;
-Tb= 7;
-bits = randi ([0 1] ,number_of_realizations ,number_of_bits);
-
-% Data = zeros (number_of_realizations , size(bits,2)*number_of_samples);
-Data = [];
-s_one = zeros(1, number_of_samples);
-s_one (1,:) = sqrt(2*Eb/Tb);
-s_zero = (sqrt(2*Eb/Tb))*cos(2*pi*(0:Tb/number_of_samples:(Tb-Tb/number_of_samples))/Tb^2)+1j*(sqrt(2*Eb/Tb))*sin(2*pi*(0:Tb/number_of_samples:(Tb-Tb/number_of_samples))/Tb^2);
- for row = 1: number_of_realizations
-     for column = 1 :number_of_bits
-         if bits(row , column ) == 1
-             Data = [Data , s_one];
-         else
-            Data = [Data, s_zero];
-         end
-     end   
- end
- Data = (reshape (Data, number_of_bits*Tb , number_of_realizations))';
- Data_transmitted = zeros (number_of_realizations, n);
- for i = 1: number_of_realizations
-     td=randi(number_of_samples)-1;              % generate random number from 0 to 6
-     X = Data(i,:);
-     Data_transmitted(i,:) = X(td+1: n+td);
- end
+data_transmitted = (data(td+1:Tb*number_of_bits+td))';    % window data from td to 700+td (700 samples)
 end
