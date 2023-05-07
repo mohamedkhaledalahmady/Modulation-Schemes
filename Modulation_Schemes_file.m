@@ -267,7 +267,7 @@ Ts=1;                                           % sample duration every 1 sec
 Fs=1/Ts;                                        % sampling frequency
 freq =(-N/2+1:N/2)*(Fs/(N));                    % Frequency axis (Hz)
 figure
-plot(freq, abs(PSD)/N, 'linewidth', 1);                 
+plot(freq, abs(PSD), 'linewidth', 1);                 
 xlabel('Frequency (Hz)');
 ylabel('Magnitude');
 title('PSD of BaseBand Signal');
@@ -278,7 +278,7 @@ fc=1e6;                                         % carrier frequency
 freq1 = ((-N/2+1:N/2)*(Fs/(N))+fc);             % Frequency axis (Hz)
 freq2 = ((-N/2+1:N/2)*(Fs/(N))-fc);             % Frequency axis (Hz)
 figure
-plot(freq1, abs(PSD)/N, freq2, abs(PSD)/N, 'linewidth', 2);                 
+plot(freq1, abs(PSD), freq2, abs(PSD), 'linewidth', 2);                 
 xlabel('Frequency (Hz)');
 ylabel('Magnitude');
 title('PSD of PassBand Signal');
