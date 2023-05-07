@@ -235,7 +235,7 @@ hold off
 clear
 clc
 close all
-number_of_enamples=500;                          % total number of Realizations
+number_of_enamples=5000;                          % total number of Realizations
 number_of_bits=100;                              % number of bits in each Realization
 Tb=7;                                            % number of samples for each bit
 number_of_samples=number_of_bits*Tb;             % total number of samples for each Realization
@@ -247,32 +247,34 @@ for i = 1 : number_of_enamples
         Total_Transmitted_Data = [Total_Transmitted_Data; Generate_Random_Data()];
     end
 end
-%%Calculate Statistical AutoCorrelation function (ACF)
+%% Calculate Statistical AutoCorrelation function (ACF)
 average=zeros(1, number_of_samples);
-for i = 1 : number_of_samples
-    average(1,i) = mean((Total_Transmitted_Data(:,1)).*conj((Total_Transmitted_Data(:,i))));
+for i = 1 : number_of_samples/2
+    average(1,i)     = mean(((Total_Transmitted_Data(:,350))).*conj((Total_Transmitted_Data(:,i))));
+    average(1,350+i) = mean(((Total_Transmitted_Data(:,350))).*conj((Total_Transmitted_Data(:,350+i))));    
 end
 figure
-plot(average)
+plot(-(number_of_samples/2-1):1:number_of_samples/2, (average))
 grid on
 xlabel("\tau")
 ylabel("ACF")
 title("Statistical ACF")
-%%Calculate PSD
+xlim([-50 50])
+%% Calculate PSD
 PSD = fftshift(fft(average));
 N = length(PSD);                                % Number of samples
 Ts=1;                                           % sample duration every 1 sec
 Fs=1/Ts;                                        % sampling frequency
 freq =(-N/2+1:N/2)*(Fs/(N));                    % Frequency axis (Hz)
 figure
-plot(freq, abs(PSD)/N, 'linewidth', 2);                 
+plot(freq, abs(PSD)/N, 'linewidth', 1);                 
 xlabel('Frequency (Hz)');
 ylabel('Magnitude');
 title('PSD of BaseBand Signal');
 grid on
 
-%%shift PSD
-fc=1e1;
+%% shift PSD
+fc=1e6;                                         % carrier frequency
 freq1 = ((-N/2+1:N/2)*(Fs/(N))+fc);             % Frequency axis (Hz)
 freq2 = ((-N/2+1:N/2)*(Fs/(N))-fc);             % Frequency axis (Hz)
 figure
