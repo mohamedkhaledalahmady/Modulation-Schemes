@@ -5,7 +5,7 @@ clc
 
 %% BPSK
 %% Generate data bit stream
-number_of_bits = 1000;                      % number of transmitted bits
+number_of_bits = 1000000;                      % number of transmitted bits
 threshold = 0;                              % threshold value
 bits = randi([0 1], 1, number_of_bits);     % generate random bits
 Tx_Data_BPSK = 2*bits-1;                    % mapping to BPSK
@@ -36,7 +36,7 @@ hold off
 
 %% QPSK_1
 %% Generate data bit stream
-number_of_bits = 1000;                       % number of transmitted bits
+number_of_bits = 1000000;                       % number of transmitted bits
 M = 4;                                       % number of symbols
 bits = randi([0 1], 1, number_of_bits);      % generate random bits
 Tx_Data_QPSK_1 = mapping_QPSK_1(bits);       % determine Tx data
@@ -95,7 +95,7 @@ hold off
 
 %% 8PSK
 %% Generate data bit stream
-number_of_bits = 1000 - 1;                         % number of transmitted bits
+number_of_bits = 1000000 - 1;                         % number of transmitted bits
 M = 8;                                             % number of symbols
 bits = randi([0 1], 1, number_of_bits);            % generate random bits
 Tx_Data_8PSK = mapping_8PSK(bits);                 % determine Tx data
@@ -131,7 +131,7 @@ hold off
 
 %% 16QAM
 %% Generate data bit stream
-number_of_bits = 1000;                         % number of transmitted bits
+number_of_bits = 1000000;                         % number of transmitted bits
 M = 16;                                        % number of symbols
 data_bits = randi([0 1], 1, number_of_bits);   % generate random bits
 Tx_Data_16QAM = mapping_16QAM(data_bits);      % determine Tx data
@@ -165,7 +165,7 @@ hold off
 
 %% FSK
 %% Generate data bit stream
-number_of_bits = 1000;                          % number of transmitted bits
+number_of_bits = 1000000;                          % number of transmitted bits
 amplitude = 1;                                  % amplitude of transmitted signal
 data_bits = randi([0 1], 1, number_of_bits);    % generate random bits
 Tx_Data_FSK = data_bits;                        % determine Tx data
