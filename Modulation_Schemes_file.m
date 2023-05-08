@@ -5,22 +5,22 @@ clc
 
 %% BPSK
 %% Generate data bit stream
-number_of_bits = 1000000;                   % number of transmitted bits
+number_of_bits = 1000;                      % number of transmitted bits
 threshold = 0;                              % threshold value
 bits = randi([0 1], 1, number_of_bits);     % generate random bits
-Tx_Data = 2*bits-1;                         % mapping to BPSK
+Tx_Data_BPSK = 2*bits-1;                    % mapping to BPSK
 %% Add AWGN from Channel
 Eb = 1;                                                 % energy of bit
 SNR = -2:0.5:20;                                        % SNR valus
 No = Eb./(10.^(SNR/10));                                % variance value of noise
 noise = (sqrt(No/2))'.*randn(1, number_of_bits);        % generate noise with zero mean and No/2 variance
 %% Add Noise to Tx data
-Rx_Data = Tx_Data + noise;                              % adding noise to Tx data
+Rx_Data_BPSK = Tx_Data_BPSK + noise;                    % adding noise to Tx data
 %% BER Calculations
 BER_Calculated_BPSK = zeros(1, length(SNR));
 BER_Theoretical_BPSK = 0.5*erfc(sqrt(Eb./No));
 for i = 1:length(SNR)
-    BER_Calculated_BPSK(1, i) = (sum(sign(Rx_Data(i, :)) ~= Tx_Data))/number_of_bits;
+    BER_Calculated_BPSK(1, i) = (sum(sign(Rx_Data_BPSK(i, :)) ~= Tx_Data_BPSK))/number_of_bits;
 end
 figure
 semilogy(SNR, BER_Calculated_BPSK, 'LineWidth', 2)
@@ -36,22 +36,22 @@ hold off
 
 %% QPSK_1
 %% Generate data bit stream
-number_of_bits = 1000000;                       % number of transmitted bits
-M = 4;                                          % number of symbols
-bits = randi([0 1], 1, number_of_bits);         % generate random bits
-Tx_Data = mapping_QPSK_1(bits);                 % determine Tx data
+number_of_bits = 1000;                       % number of transmitted bits
+M = 4;                                       % number of symbols
+bits = randi([0 1], 1, number_of_bits);      % generate random bits
+Tx_Data_QPSK_1 = mapping_QPSK_1(bits);       % determine Tx data
 %% Add AWGN from Channel
 Eb = 1;                                         % energy of bit
 SNR = -2:0.5:20;                                % SNR values
 No = Eb./(10.^(SNR/10));                        % variance value of noise
 noise = (sqrt(No/2))'.*randn(1, number_of_bits/2) + 1j*(sqrt(No/2))'.*randn(1, number_of_bits/2); % generate noise with zero mean and No/2 variance
 %% Add Noise to Tx data
-Rx_Data = Tx_Data + noise;                      % adding noise to Tx data
+Rx_Data_QPSK_1 = Tx_Data_QPSK_1 + noise;        % adding noise to Tx data
 %% BER Calculations
 BER_Calculated_QPSK_1 = zeros(1, length(SNR));
 BER_Theoretical_QPSK = 0.5 * erfc(sqrt(Eb./No));
-R = real(Rx_Data);
-I = imag(Rx_Data);
+R = real(Rx_Data_QPSK_1);
+I = imag(Rx_Data_QPSK_1);
 extract_Data(1:size(R, 1), 1:2:2 * size(R, 2)) = R;
 extract_Data(1:size(I, 1), 2:2:2 * size(I, 2)) = I;
 Data = 2*bits-1;
@@ -73,13 +73,13 @@ hold off
 %% QPSK_2
 %% Generate data bit stream
 Data = randi([0 1], 1, number_of_bits);             % generate random bits
-Tx_Data = mapping_QPSK_2(Data);                     % determine Tx data
+Tx_Data_QPSK_2 = mapping_QPSK_2(Data);              % determine Tx data
 %% Add Noise to Tx data
-Rx_Data = Tx_Data + noise;                          % adding noise to Tx data
+Rx_Data_QPSK_2 = Tx_Data_QPSK_2 + noise;            % adding noise to Tx data
 %% BER Calculations
 BER_Calculated_QPSK_2 = zeros(1, length(SNR));
 for i = 1:length(SNR)
-    BER_Calculated_QPSK_2(1, i) = BER_QPSK_2(Data, Rx_Data(i, :))/number_of_bits;
+    BER_Calculated_QPSK_2(1, i) = BER_QPSK_2(Data, Rx_Data_QPSK_2(i, :))/number_of_bits;
 end
 figure
 semilogy(SNR, BER_Calculated_QPSK_1, 'LineWidth', 2)
@@ -95,10 +95,10 @@ hold off
 
 %% 8PSK
 %% Generate data bit stream
-number_of_bits = 1000000 - 1;                         % number of transmitted bits
-M = 8;                                              % number of symbols
-bits = randi([0 1], 1, number_of_bits);             % generate random bits
-Tx_Data = mapping_8PSK(bits);                       % determine Tx data
+number_of_bits = 1000 - 1;                         % number of transmitted bits
+M = 8;                                             % number of symbols
+bits = randi([0 1], 1, number_of_bits);            % generate random bits
+Tx_Data_8PSK = mapping_8PSK(bits);                 % determine Tx data
 %% Add AWGN from Channel
 bits = log2(M);
 Eb = 1;
@@ -107,13 +107,13 @@ SNR = -2:0.5:20;                                    % SNR values
 No = Eb ./ (10 .^ (SNR / 10));                      % variance value of noise
 noise = (sqrt(No / 2))' .* randn(1, number_of_bits / bits) + 1j * (sqrt(No / 2))' .* randn(1, number_of_bits / bits); % generate noise with zero mean and No/2 variance
 %% Add Noise to Tx data
-Rx_Data = Tx_Data + noise; % adding noise to Tx data
+Rx_Data_8PSK = Tx_Data_8PSK + noise; % adding noise to Tx data
 %% BER Calculations
 SER_Theoretical_8PSK = erfc(sqrt(E./No)*sin(pi/M));
 BER_Exact_8PSK = berawgn(SNR, 'psk', M, 'nondiff');
 SER_Calculated_8PSK = zeros(1, length(SNR));
 for i = 1:length(SNR)
-    SER_Calculated_8PSK(1, i) = angle_8PSK(Tx_Data, Rx_Data(i, :))/(number_of_bits/log2(M));
+    SER_Calculated_8PSK(1, i) = angle_8PSK(Tx_Data_8PSK, Rx_Data_8PSK(i, :))/(number_of_bits/log2(M));
 end
 BER_Calculated_8PSK = SER_Calculated_8PSK/bits;
 BER_Theoretical_8PSK = SER_Theoretical_8PSK/bits;
@@ -121,8 +121,6 @@ figure
 semilogy(SNR, BER_Calculated_8PSK, 'LineWidth', 2)
 hold on
 semilogy(SNR, BER_Theoretical_8PSK, 'LineWidth', 2)
-% hold on
-% semilogy(SNR, BER_Exact_8PSK, 'LineWidth', 2)
 xlim([-2 12])
 xlabel("Eb/No (dB)")
 ylabel("Error Rate")
@@ -133,10 +131,10 @@ hold off
 
 %% 16QAM
 %% Generate data bit stream
-number_of_bits = 1000000;                         % number of transmitted bits
-M = 16;                                         % number of symbols
-data_bits = randi([0 1], 1, number_of_bits);    % generate random bits
-Tx_Data = mapping_16QAM(data_bits);             % determine Tx data
+number_of_bits = 1000;                         % number of transmitted bits
+M = 16;                                        % number of symbols
+data_bits = randi([0 1], 1, number_of_bits);   % generate random bits
+Tx_Data_16QAM = mapping_16QAM(data_bits);      % determine Tx data
 %% Add AWGN from Channel
 bits = log2(M);
 Eb = 2.5;
@@ -145,12 +143,12 @@ SNR = -2:0.5:20;                                % SNR values
 No = Eb ./ (10 .^ (SNR / 10));                  % variance value of noise
 noise = (sqrt(No/2))'.*randn(1, number_of_bits/bits)+ 1j * (sqrt(No / 2))' .* randn(1, number_of_bits / bits); % generate noise with zero mean and No/2 variance
 %% Add Noise to Tx data
-Rx_Data = Tx_Data + noise;                      % adding noise to Tx data
+Rx_Data_16QAM = Tx_Data_16QAM + noise;          % adding noise to Tx data
 %% BER Calculations
 SER_Theoretical_16QAM = 1.5 * erfc(sqrt(E./No));
 BER_Calculated_16QAM = zeros(1, length(SNR));
 for i = 1:length(SNR)
-    BER_Calculated_16QAM(1, i) = BER_16QAM(data_bits, Rx_Data(i, :))/(number_of_bits);
+    BER_Calculated_16QAM(1, i) = BER_16QAM(data_bits, Rx_Data_16QAM(i, :))/(number_of_bits);
 end
 BER_Theoretical_16QAM = SER_Theoretical_16QAM/bits;
 figure
@@ -167,24 +165,24 @@ hold off
 
 %% FSK
 %% Generate data bit stream
-number_of_bits = 1000000;                       % number of transmitted bits
+number_of_bits = 1000;                          % number of transmitted bits
 amplitude = 1;                                  % amplitude of transmitted signal
 data_bits = randi([0 1], 1, number_of_bits);    % generate random bits
-Tx_Data = data_bits;                            % determine Tx data
-Tx_Data(Tx_Data == 1) = 1j;
-Tx_Data(Tx_Data == 0) = 1;
+Tx_Data_FSK = data_bits;                        % determine Tx data
+Tx_Data_FSK(Tx_Data_FSK == 1) = 1j;
+Tx_Data_FSK(Tx_Data_FSK == 0) = 1;
 %% Add AWGN from Channel
 Eb = 1;
 SNR = -2:0.5:20; % SNR values
 No = Eb ./ (10 .^ (SNR / 10));                  % variance value of noise
 noise = (sqrt(No / 2))' .* randn(1, number_of_bits) + 1j * (sqrt(No / 2))' .* randn(1, number_of_bits); % generate noise with zero mean and No/2 variance
 %% Add Noise to Tx data
-Rx_Data = Tx_Data + noise;                      % adding noise to Tx data
+Rx_Data_FSK = Tx_Data_FSK + noise;              % adding noise to Tx data
 %% BER Calculations
 BER_Theoretical_FSK = 0.5*erfc(sqrt(E./(2*No)));
 BER_Calculated_FSK = zeros(1, length(SNR));
 for i = 1:length(SNR)
-    BER_Calculated_FSK(1, i) = BER_FSK(data_bits, Rx_Data(i, :))/(number_of_bits);
+    BER_Calculated_FSK(1, i) = BER_FSK(data_bits, Rx_Data_FSK(i, :))/(number_of_bits);
 end
 figure
 semilogy(SNR, BER_Calculated_FSK, 'LineWidth', 2)
@@ -198,11 +196,43 @@ legend("Calculated BER", "Theoretical BER")
 grid on
 hold off
 
+%% plot signal space
+figure
+subplot(3, 2, 1)
+plot(Rx_Data_BPSK(45, :), zeros(1, length(Rx_Data_BPSK(45, :))), 'k.', 'linewidth', 1)
+hold on
+plot(Tx_Data_BPSK, zeros(1, length(Tx_Data_BPSK)), 'y.', 'linewidth', 4)
+hold off
+subplot(3, 2, 2)
+plot(Rx_Data_QPSK_1(45, :), 'k.', 'linewidth', 1)
+hold on
+plot(Tx_Data_QPSK_1, 'y.', 'linewidth', 4)
+hold off
+subplot(3, 2, 3)
+plot(Rx_Data_QPSK_2(45, :), 'k.', 'linewidth', 1)
+hold on
+plot(Tx_Data_QPSK_2, 'y.', 'linewidth', 4)
+hold off
+subplot(3, 2, 4)
+plot(Rx_Data_8PSK(45, :), 'k.', 'linewidth', 1)
+hold on
+plot(Tx_Data_8PSK, 'y.', 'linewidth', 4)
+hold off
+subplot(3, 2, 5)
+plot(Rx_Data_16QAM(45, :), 'k.', 'linewidth', 1)
+hold on
+plot(Tx_Data_16QAM, 'y.', 'linewidth', 4)
+hold off
+subplot(3, 2, 6)
+plot(Rx_Data_FSK(45, :), 'k.', 'linewidth', 1)
+hold on
+plot(Tx_Data_FSK, 'y.', 'linewidth', 4)
+hold off
 %% Comparison
 figure
 semilogy(SNR, BER_Calculated_BPSK, 'LineWidth', 2)
 hold on
-semilogy(SNR, BER_Theoretical_BPSK, '*', 'LineWidth', 1)
+semilogy(SNR, BER_Theoretical_BPSK, '.', 'LineWidth', 1)
 hold on
 semilogy(SNR, BER_Calculated_QPSK_1, 'LineWidth', 2)
 hold on
@@ -216,7 +246,7 @@ semilogy(SNR, BER_Theoretical_8PSK, 'o', 'LineWidth', 1)
 hold on
 semilogy(SNR, BER_Calculated_16QAM, 'LineWidth', 2)
 hold on
-semilogy(SNR, BER_Theoretical_16QAM, '*', 'LineWidth', 1)
+semilogy(SNR, BER_Theoretical_16QAM, '.', 'LineWidth', 1)
 hold on
 semilogy(SNR, BER_Calculated_FSK, 'LineWidth', 2)
 hold on
@@ -232,9 +262,6 @@ hold off
 
 %% PSD for FSK
 %% Generate Ensample
-clear
-clc
-close all
 number_of_enamples=500;                          % total number of Realizations
 number_of_bits=100;                              % number of bits in each Realization
 Tb=7;                                            % number of samples for each bit
